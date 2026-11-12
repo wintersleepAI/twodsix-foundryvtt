@@ -385,7 +385,7 @@ function handleRender(ev, htmlRend) {
  */
 export function _getTranslatedCharacteristicList(actor) {
   const returnValue = {};
-  if (actor) {
+  if (actor && actor.type != "ship") {
     returnValue["STR"] = getCharacteristicLabelWithMod(actor, "strength");
     returnValue["DEX"] = getCharacteristicLabelWithMod(actor, "dexterity");
     returnValue["END"] = getCharacteristicLabelWithMod(actor, "endurance");

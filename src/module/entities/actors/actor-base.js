@@ -1155,7 +1155,7 @@ async function getMoveNumber(itemData) {
  * @return {void}
  */
 export async function correctMissingUntrainedSkill(actor) {
-  if (["traveller", "robot", "animal"].includes(actor.type)) {
+  if (["traveller", "robot", "animal", "ship"].includes(actor.type)) {
     //Check for missing untrained skill
     const untrainedSkill = actor.getUntrainedSkill();
     if (!untrainedSkill) {

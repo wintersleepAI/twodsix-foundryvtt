@@ -28,5 +28,17 @@
           {{localize "TWODSIX.Ship.AddShipPosition"}}
       </div>
     </div>
+    <div class="drag ship-position">
+      <div class="ship-position-box">
+          <label>{{localize "TWODSIX.Ship.AllowNoActorPositions"}}
+            <input type="checkbox" class="checkbox" name="system.shipAllowNoActorPositions" {{checked actor.system.shipAllowNoActorPositions}} data-dtype="Boolean" />
+          </label>
+          {{#if actor.system.shipAllowNoActorPositions}}
+            <label data-tooltip='{{localize "TWODSIX.Ship.NoActorSkillLevelTooltip"}}'>{{localize "TWODSIX.Ship.NoActorSkillLevel"}}
+              <input type="number" step="1" class="untrained-skill-input" value="{{untrainedSkill.system.value}}" />
+            </label>
+          {{/if}}
+      </div>
+    </div>
   </div>
 </div>

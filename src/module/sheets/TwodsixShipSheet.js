@@ -79,8 +79,13 @@ export class TwodsixShipSheet extends foundry.applications.api.HandlebarsApplica
       if (shipPosActors.length === 1) {
         actorId = shipPosActors[0].dataset.id;
       } else if (shipPosActors.length === 0) {
-        ui.notifications.warn("TWODSIX.Ship.NoActorsForAction", {localize: true});
-        return null;
+        if (this.actor.system.shipAllowNoActorPositions) {
+          actorId = this.actor.id;
+        } else {
+          ui.notifications.warn("TWODSIX.Ship.NoActorsForAction", {localize: true});
+          return null;
+        }
+
       } else {
         actorId = shipPosEl.querySelector(".ship-position-actor-token.force-border")?.dataset.id;
       }
@@ -291,6 +296,7 @@ export class TwodsixShipSheet extends foundry.applications.api.HandlebarsApplica
     context.shipPositions = this.actor.itemTypes.ship_position
       .slice()
       .sort((a, b) => a.system.order - b.system.order);
+    context.untrainedSkill = this.actor.getUntrainedSkill();
 
     const useShipAutoCalc = game.settings.get('twodsix', 'useShipAutoCalcs');
     const showCost = game.settings.get('twodsix', 'showCost') && useShipAutoCalc;
@@ -335,6 +341,25 @@ export class TwodsixShipSheet extends foundry.applications.api.HandlebarsApplica
     if (this.options.sheetType === 'TwodsixShipSheet') {
       this.element.querySelector(".window-content").classList.add("overlap-header");
       this.element.querySelector(".window-header").classList.add("transparent-header-ship");
+    }
+
+    this.element.querySelector(".untrained-skill-input")?.addEventListener('change', this._onUntrainedSkillChange.bind(this));
+  }
+
+  /**
+   * Update the ship's untrained skill value (used for actions performed with no actor assigned).
+   * Not a named form field, so it is handled here rather than by the actor form submit.
+   * @param {Event} ev
+   * @returns {Promise<void>}
+   */
+  async _onUntrainedSkillChange(ev) {
+    ev.stopPropagation();
+    const untrainedSkill = this.actor.getUntrainedSkill();
+    const value = parseInt(ev.currentTarget.value, 10);
+    if (untrainedSkill && !isNaN(value)) {
+      await untrainedSkill.update({"system.value": value});
+    } else {
+      ev.currentTarget.value = untrainedSkill?.system.value ?? "";
     }
   }
 

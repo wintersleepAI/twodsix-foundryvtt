@@ -1643,8 +1643,8 @@
     "Ship": {
       "Actions": "Actions",
       "AllowNoActorPositions": "Allow actions without an actor",
-      "NoActorSkillLevel": "Skill Level",
-      "NoActorSkillLevelTooltip": "Untrained skill value used when an action is performed with no actor assigned",
+      "NoActorSkillLevel": "Default Skill Level",
+      "NoActorSkillLevelTooltip": "The default (untrained) skill value used when an action is performed with no actor assigned",
       "ActionType": "Action Type",
       "ActionRollFormula": "Action Roll Formula",
       "Unknown": "unknown",

@@ -106,8 +106,12 @@ export class TwodsixShipSheet extends foundry.applications.api.HandlebarsApplica
    */
   static performShipAction(ev, positionId, actorId, actionId, shipActor) {
     if (!actorId) {
-      ui.notifications.warn("TWODSIX.Ship.ActorMustBeSelectedForAction", {localize: true});
-      return false;
+      if (shipActor.system.shipAllowNoActorPositions) {
+        actorId = shipActor.id;
+      } else {
+        ui.notifications.warn("TWODSIX.Ship.ActorMustBeSelectedForAction", {localize: true});
+        return false;
+      }
     }
     const shipPosition = shipActor.items.get(positionId);
     const action = (shipPosition?.system)?.actions[actionId];

@@ -1649,6 +1649,9 @@
       "ActorMustBeSelectedForAction": "No actor selected, one must be selected to perform the action",
       "AddShipPosition": "Add Ship Position",
       "AddActorToPosition": "Add actor to position.",
+      "AllowNoActorPositions": "Allow actions without an actor",
+      "NoActorSkillLevel": "Default Skill Level",
+      "NoActorSkillLevelTooltip": "The default (untrained) skill value used when an action is performed with no actor assigned",
       "ArmorCD": {
         "Unarmored": "Unarmored",
         "Light": "Light",

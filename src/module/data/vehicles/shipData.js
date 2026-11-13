@@ -38,6 +38,8 @@ export class ShipData extends TwodsixVehicleBaseData {
       available: new fields.NumberField({required: true, nullable: false, integer: false, initial: 0})
     });
     schema.shipPositionActorIds = new fields.ObjectField({required: true, initial: {}});
+    schema.shipAllowNoActorPositions = new fields.BooleanField({required: true, initial: false});
+    schema.defaultSkillLevel = new fields.NumberField({required: false, nullable: true, integer: true, initial: 0});
     schema.shipStats = new fields.SchemaField({
       hull: makeResourceField(0, 0),
       fuel: new fields.SchemaField({

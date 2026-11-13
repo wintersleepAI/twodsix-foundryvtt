@@ -209,6 +209,16 @@
               </div>
           {{/each}}
         </div>
+        <div class="flex">
+          <label>{{localize "TWODSIX.Ship.AllowNoActorPositions"}}
+            <input type="checkbox" class="checkbox" name="system.shipAllowNoActorPositions" {{checked actor.system.shipAllowNoActorPositions}} data-dtype="Boolean" />
+          </label>
+          {{#if actor.system.shipAllowNoActorPositions}}
+            <label data-tooltip='{{localize "TWODSIX.Ship.NoActorSkillLevelTooltip"}}'>{{localize "TWODSIX.Ship.NoActorSkillLevel"}}
+              <input type="number" step="1" class="untrained-skill-input battle-input" value="{{actor.system.defaultSkillLevel}}" name="system.defaultSkillLevel" />
+            </label>
+          {{/if}}
+        </div>
       </div>
 
       <div class="battle-cargo-container">

@@ -57,7 +57,7 @@ export class TwodsixDiceRoll {
   constructor(rollSettings, actor, skill = null, item = null) {
     this.rollSettings = rollSettings;
     this.actor = actor;
-    this.skill = rollSettings.rollModifiers.selectedSkill ? fromUuidSync(rollSettings.rollModifiers.selectedSkill) : skill;
+    this.skill = resolveSelectedSkill(rollSettings.rollModifiers.selectedSkill, actor, skill);
     this.item = item;
   }
 
@@ -607,6 +607,26 @@ export class TwodsixDiceRoll {
       {messageMode: this.rollSettings.messageMode}
     );
   }
+}
+
+/**
+ * Resolve the skill chosen for a roll (by uuid) to a skill document.
+ * The roller's own items are checked first: an unsaved (virtual) actor, such as a ship's virtual crew,
+ * has no uuid, so fromUuidSync can't find its embedded skills.
+ * @param {string | undefined} selectedSkillUuid  uuid of the selected skill
+ * @param {TwodsixActor} actor                    the actor making the roll
+ * @param {TwodsixItem | null} defaultSkill        skill to use if none is selected, or if it can't be resolved for a virtual actor
+ * @returns {TwodsixItem | null}
+ */
+function resolveSelectedSkill(selectedSkillUuid, actor, defaultSkill) {
+  if (!selectedSkillUuid) {
+    return defaultSkill;
+  }
+  const ownSkill = actor?.items?.find(item => item.uuid === selectedSkillUuid);
+  if (ownSkill) {
+    return ownSkill;
+  }
+  return (actor && !actor.uuid) ? defaultSkill : fromUuidSync(selectedSkillUuid);
 }
 
 /**

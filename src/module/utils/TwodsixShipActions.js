@@ -76,7 +76,11 @@ export class TwodsixShipActions {
     if (settings) {
       Object.assign(settings, {
         extraFlavor: game.i18n.localize("TWODSIX.Ship.MakesChatRollAction").replace("_ACTION_NAME_", extra.actionName || game.i18n.localize("TWODSIX.Ship.Unknown")).replace("_POSITION_NAME_", (extra.positionName || game.i18n.localize("TWODSIX.Ship.Unknown"))),
-        flags: {tokenUUID: extra.ship?.uuid}
+        flags: {
+          tokenUUID: extra.ship?.uuid,
+          // A virtual crew actor has no uuid, so chat card buttons (damage, chain, opposed) act through the ship
+          actorUUID: extra.actor?.uuid || extra.ship?.uuid
+        }
       });
       Object.assign(settings.rollModifiers, {item: extra.diceModifier ? parseInt(extra.diceModifier) : 0});
       const skill = settings.skill;
@@ -98,7 +102,7 @@ export class TwodsixShipActions {
         }
 
         if (extra.component) {
-          return await extra.component.skillRoll(false, options);
+          return await extra.component.skillRoll(false, options, true, {actor: extra.actor});
         } else {
           return await skill.skillRoll(false, options);
         }

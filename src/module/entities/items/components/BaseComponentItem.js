@@ -15,8 +15,8 @@ export class BaseComponentItem extends TwodsixItem {
   }
 
   /** @override */
-  async _resolveSkillAndItem(tmpSettings) {
-    const workingActor = await fromUuid(tmpSettings?.flags?.actorUUID);
+  async _resolveSkillAndItem(tmpSettings, options = {}) {
+    const workingActor = options.actor ?? await fromUuid(tmpSettings?.flags?.actorUUID);
     const skill = workingActor?.items.getName(tmpSettings?.skillName) ?? null;
     return { skill, item: this, workingActor };
   }

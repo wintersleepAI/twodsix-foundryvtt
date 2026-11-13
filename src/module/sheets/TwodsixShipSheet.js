@@ -79,8 +79,10 @@ export class TwodsixShipSheet extends foundry.applications.api.HandlebarsApplica
       if (shipPosActors.length === 1) {
         actorId = shipPosActors[0].dataset.id;
       } else if (shipPosActors.length === 0) {
-        ui.notifications.warn("TWODSIX.Ship.NoActorsForAction", {localize: true});
-        return null;
+        if (!this.actor.system.shipAllowNoActorPositions) {
+          ui.notifications.warn("TWODSIX.Ship.NoActorsForAction", {localize: true});
+          return null;
+        }
       } else {
         actorId = shipPosEl.querySelector(".ship-position-actor-token.force-border")?.dataset.id;
       }
@@ -92,6 +94,8 @@ export class TwodsixShipSheet extends foundry.applications.api.HandlebarsApplica
   }
 
   /**
+   * Perform a ship position action.  If no actor is given, the position has no actors assigned and the ship allows
+   * actions without an actor, the ship's virtual crew actor (see ShipActor#getVirtualCrewActor) is used instead.
    * @param {Event} ev
    * @param {string} positionId
    * @param {string} actorId
@@ -100,16 +104,20 @@ export class TwodsixShipSheet extends foundry.applications.api.HandlebarsApplica
    * @returns {boolean|void}
    */
   static performShipAction(ev, positionId, actorId, actionId, shipActor) {
-    if (!actorId) {
+    const shipPosition = shipActor.items.get(positionId);
+    let actor = actorId ? game.actors?.get(actorId) : undefined;
+    if (!actor && shipActor.system.shipAllowNoActorPositions && !shipPosition?.system.actors?.length) {
+      actor = shipActor.getVirtualCrewActor();
+    }
+    if (!actor) {
       ui.notifications.warn("TWODSIX.Ship.ActorMustBeSelectedForAction", {localize: true});
       return false;
     }
-    const shipPosition = shipActor.items.get(positionId);
     const action = (shipPosition?.system)?.actions[actionId];
     if (action) {
       const component = shipActor.items.find(item => item.id === action.component);
       const extra = {
-        actor: game.actors?.get(actorId),
+        actor: actor,
         ship: shipActor,
         component: component,
         event: ev,

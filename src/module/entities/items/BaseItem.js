@@ -61,9 +61,10 @@ export default class TwodsixItem extends Item {
    * Resolves the skill, item, and working actor to use for a skill roll.
    * Subclasses override to provide type-specific resolution.
    * @param {object} [tmpSettings]
+   * @param {object} [options]  The options passed to skillRoll (see there)
    * @returns {Promise<{skill: TwodsixItem|null, item: TwodsixItem|undefined, workingActor: TwodsixActor}>}
    */
-  async _resolveSkillAndItem(tmpSettings) {
+  async _resolveSkillAndItem(tmpSettings, options = {}) {
     const skill = this.system?.skill ? this.actor?.items.get(this.system.skill) ?? null : null;
     return { skill, item: this, workingActor: this.actor };
   }
@@ -294,10 +295,14 @@ export default class TwodsixItem extends Item {
    * @param {boolean} showThrowDialog  Whether to show roll/through dialog
    * @param {TwodsixRollSettings|undefined} tmpSettings Roll settings to use
    * @param {boolean} showInChat Whether to show attack in chat
+   * @param {object} [options]
+   * @param {TwodsixActor} [options.actor] The actor making the roll, for items (e.g. ship components) that don't
+   *   belong to that actor.  Takes precedence over tmpSettings.flags.actorUUID, and is required for an unsaved
+   *   (virtual) actor, whose uuid is null.
    * @returns {TwodsixDiceRoll | void} Results of dice roll, if made
    */
-  async skillRoll(showThrowDialog, tmpSettings, showInChat = true) {
-    const { skill: resolvedSkill, item, workingActor } = await this._resolveSkillAndItem(tmpSettings);
+  async skillRoll(showThrowDialog, tmpSettings, showInChat = true, options = {}) {
+    const { skill: resolvedSkill, item, workingActor } = await this._resolveSkillAndItem(tmpSettings, options);
     let skill = resolvedSkill;
 
     if (!skill) {

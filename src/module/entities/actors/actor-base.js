@@ -1180,7 +1180,7 @@ export async function correctMissingUntrainedSkill(actor) {
 /**
  * @returns {object}
  */
-function buildUntrainedSkillData() {
+export function buildUntrainedSkillData() {
   return {
     "name": game.i18n.localize("TWODSIX.Actor.Skills.Untrained"),
     "type": "skills",

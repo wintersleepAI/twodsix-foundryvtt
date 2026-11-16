@@ -90,7 +90,8 @@ export class TwodsixShipActions {
         if (settings.rollModifiers.characteristic) {
           extra.actor.characteristicRoll({
             rollModifiers: settings.rollModifiers,
-            difficulty: settings.difficulty
+            difficulty: settings.difficulty,
+            flags: settings.flags
           }, true);
         } else {
           return false;

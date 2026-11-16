@@ -1653,6 +1653,10 @@
       "NoActorSkillLevel": "Default Skill Level",
       "NoActorSkillLevelTooltip": "The default (untrained) skill value used when an action is performed with no actor assigned",
       "NoActorCrewName": "{shipName} Crew",
+      "UncrewedPositionName": "Uncrewed {positionName}",
+      "UncrewedPositionTooltip": "No actor assigned: actions use skill level {skillLevel}",
+      "UncrewedSkillModifier": "Uncrewed Skill Modifier",
+      "UncrewedSkillModifierTooltip": "Added to the ship's Default Skill Level when this position has no actor assigned and the ship allows actions without an actor",
       "ArmorCD": {
         "Unarmored": "Unarmored",
         "Light": "Light",

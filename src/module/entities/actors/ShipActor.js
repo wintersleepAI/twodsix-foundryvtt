@@ -15,22 +15,48 @@ import { TwodsixVehicleBaseActor } from './TwodsixVehicleBaseActor.js';
  */
 export class ShipActor extends TwodsixVehicleBaseActor {
 
-  /** @type {{key: string, actor: TwodsixActor} | undefined} */
-  _virtualCrew;
+  /**
+   * Virtual crew actors, one per ship position id, each with the cache key it was built from.
+   * @type {Map<string, {key: string, actor: TwodsixActor}>}
+   */
+  _virtualCrew = new Map();
 
   /**
-   * Get an in-memory (never saved) traveller that performs ship position actions when no actor is assigned
-   * to the position and `system.shipAllowNoActorPositions` is set.  Its only skill is Untrained, valued at
-   * `system.defaultSkillLevel`, so every skill check uses that level.  Characteristics are left at their
-   * defaults, which give a DM of +0.
-   * Because the actor is never saved its uuid is null, so pass the actor object down the roll chain instead.
-   * The actor is created on first use and rebuilt only when the ship's name, image or default skill level changes.
-   * @returns {TwodsixActor}
+   * Whether a position's actions are performed by its virtual crew (see getVirtualCrewActor): the ship allows actions
+   * without an actor and no actor is assigned to the position.
+   * @param {TwodsixItem} position  a ship_position item of this ship
+   * @returns {boolean}
    */
-  getVirtualCrewActor() {
+  isUncrewedPosition(position) {
+    return !!this.system.shipAllowNoActorPositions && !position.system.actors?.length;
+  }
+
+  /**
+   * Skill level used for a position's actions when it has no actor assigned: the ship's `system.defaultSkillLevel`
+   * plus the position's `system.uncrewedSkillModifier`.
+   * @param {TwodsixItem} position  a ship_position item of this ship
+   * @returns {number}
+   */
+  getUncrewedSkillLevel(position) {
     // defaultSkillLevel is nullable (the input can be cleared), so fall back to the skill model's default, the
     // normal untrained level (-3).  Use ?? rather than || because 0 is a valid skill level.
-    const skillLevel = this.system.defaultSkillLevel ?? CONFIG.Item.dataModels.skills.schema.getInitialValue().value;
+    const defaultSkillLevel = this.system.defaultSkillLevel ?? CONFIG.Item.dataModels.skills.schema.getInitialValue().value;
+    return defaultSkillLevel + (position?.system.uncrewedSkillModifier ?? 0);
+  }
+
+  /**
+   * Get an in-memory (never saved) traveller that performs a ship position's actions when no actor is assigned
+   * to the position and `system.shipAllowNoActorPositions` is set.  Its only skill is Untrained, valued at
+   * getUncrewedSkillLevel(position), so every skill check uses that level.  Characteristics are left at their
+   * defaults, which give a DM of +0.
+   * Because the actor is never saved its uuid is null, so pass the actor object down the roll chain instead.
+   * Each position gets its own actor, created on first use and rebuilt only when the ship's name or image, or the
+   * position's skill level, changes.
+   * @param {TwodsixItem} position  a ship_position item of this ship
+   * @returns {TwodsixActor}
+   */
+  getVirtualCrewActor(position) {
+    const skillLevel = this.getUncrewedSkillLevel(position);
     // e.g. "Beowulf Crew"; shown as the speaker on chat cards
     const name = game.i18n.format("TWODSIX.Ship.NoActorCrewName", {shipName: this.name});
     // Cache key built from every input that shapes the virtual actor.  JSON.stringify gives one comparable
@@ -38,11 +64,12 @@ export class ShipActor extends TwodsixVehicleBaseActor {
     // Nothing else needs to be in the key: characteristics of 7 give +0 under every ruleset, and a
     // language change needs a reload anyway.
     const key = JSON.stringify([skillLevel, name, this.img]);
-    // Build on first call (_virtualCrew is undefined), and rebuild whenever an input changes.  The check is needed
-    // because Foundry updates this ShipActor in place, so _virtualCrew survives ship edits; without it a new skill
-    // level would be ignored until a reload.  Rebuild rather than patch the old actor: its skill values are
+    // Build on first call for the position, and rebuild whenever an input changes.  The check is needed because
+    // Foundry updates this ShipActor and its positions in place, so _virtualCrew survives edits; without it a new
+    // skill level would be ignored until a reload.  Rebuild rather than patch the old actor: its skill values are
     // calculated when it is created, and creating a new one is cheap.
-    if (this._virtualCrew?.key !== key) {
+    let crew = this._virtualCrew.get(position.id);
+    if (crew?.key !== key) {
       const untrainedSkill = buildUntrainedSkillData();
       untrainedSkill.system.value = skillLevel;
       const actor = new Actor.implementation({
@@ -52,9 +79,10 @@ export class ShipActor extends TwodsixVehicleBaseActor {
         system: {untrainedSkill: untrainedSkill._id},
         items: [untrainedSkill]
       });
-      this._virtualCrew = {key, actor};
+      crew = {key, actor};
+      this._virtualCrew.set(position.id, crew);
     }
-    return this._virtualCrew.actor;
+    return crew.actor;
   }
 
   /** @override */

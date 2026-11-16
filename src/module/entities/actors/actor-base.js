@@ -4,7 +4,7 @@ import { applyToAllActors } from '../../utils/migration-utils';
 import { getDamageTypes } from '../../utils/sheetUtils';
 import { TwodsixDiceRoll } from '../../utils/TwodsixDiceRoll';
 import { TwodsixRollSettings } from '../../utils/TwodsixRollSettings';
-import { assignDefaultImage, getKeyByValue, simplifySkillName, sortByItemName } from '../../utils/utils';
+import { assignDefaultImage, getKeyByValue, getSkillSelectionKey, simplifySkillName, sortByItemName } from '../../utils/utils';
 import { TwodsixActiveEffect } from '../TwodsixActiveEffect';
 
 /** @typedef {import("@common/documents/user.mjs").BaseUser} BaseUser */
@@ -849,7 +849,7 @@ export default class TwodsixActor extends Actor {
   }
 
   /**
-   * Get skills level pairs.
+   * Get skills level pairs, keyed by getSkillSelectionKey (the skill's uuid, or its item id for an unsaved actor).
    * @return {object} an object with skill name /level pairs
    */
   getSkillNameList() {
@@ -867,7 +867,7 @@ export default class TwodsixActor extends Actor {
           || (skill.system.value >= 0 || this.system.skills[simplifySkillName(skill.name)] >= 0)
           || (skill.getFlag("twodsix", "untrainedSkill"))
           || (skill._id === this.system.untrainedSkill)) {
-          Object.assign(returnObject, {[skill.uuid]: `${skill.name} (${this.system.skills[simplifySkillName(skill.name)]})`});
+          Object.assign(returnObject, {[getSkillSelectionKey(skill)]: `${skill.name} (${this.system.skills[simplifySkillName(skill.name)]})`});
         }
       }
     }

@@ -8,6 +8,10 @@
         <div class="ship-position-box">
           {{#each shipPosition.system.actors as |actor|}}
             <img src="{{actor.img}}" draggable="true" class="ship-position-actor-token" data-drag="actor" data-id="{{actor.id}}" width="40" height="40" alt="{{actor.name}}" data-tooltip="{{actor.name}}" data-action="selectShipActor">
+          {{else}}
+            {{#with (lookup @root.uncrewedTooltips shipPosition.id) as |uncrewedTooltip|}}
+              <span class="ship-position-uncrewed" data-tooltip="{{uncrewedTooltip}}"><i class="fa-solid fa-user-slash"></i></span>
+            {{/with}}
           {{/each}}
           <span class="fa-solid fa-copy ship-position-copy" data-action="copyPosition" data-tooltip='{{localize "TWODSIX.Ship.CopyPosition"}}'></span>
           <span class="fa-solid fa-trash ship-position-delete" data-action="deletePosition" data-tooltip='{{localize "TWODSIX.Ship.DeletePosition"}}'></span>

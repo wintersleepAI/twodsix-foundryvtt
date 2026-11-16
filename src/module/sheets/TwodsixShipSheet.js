@@ -95,7 +95,7 @@ export class TwodsixShipSheet extends foundry.applications.api.HandlebarsApplica
 
   /**
    * Perform a ship position action.  If no actor is given, the position has no actors assigned and the ship allows
-   * actions without an actor, the ship's virtual crew actor (see ShipActor#getVirtualCrewActor) is used instead.
+   * actions without an actor, the position's virtual crew actor (see ShipActor#getVirtualCrewActor) is used instead.
    * @param {Event} ev
    * @param {string} positionId
    * @param {string} actorId
@@ -106,8 +106,8 @@ export class TwodsixShipSheet extends foundry.applications.api.HandlebarsApplica
   static performShipAction(ev, positionId, actorId, actionId, shipActor) {
     const shipPosition = shipActor.items.get(positionId);
     let actor = actorId ? game.actors?.get(actorId) : undefined;
-    if (!actor && shipActor.system.shipAllowNoActorPositions && !shipPosition?.system.actors?.length) {
-      actor = shipActor.getVirtualCrewActor();
+    if (!actor && shipPosition && shipActor.isUncrewedPosition(shipPosition)) {
+      actor = shipActor.getVirtualCrewActor(shipPosition);
     }
     if (!actor) {
       ui.notifications.warn("TWODSIX.Ship.ActorMustBeSelectedForAction", {localize: true});
@@ -299,6 +299,14 @@ export class TwodsixShipSheet extends foundry.applications.api.HandlebarsApplica
     context.shipPositions = this.actor.itemTypes.ship_position
       .slice()
       .sort((a, b) => a.system.order - b.system.order);
+    // Tooltip for each position whose actions will use the virtual crew, keyed by position id
+    context.uncrewedTooltips = {};
+    for (const position of context.shipPositions) {
+      if (this.actor.isUncrewedPosition(position)) {
+        const skillLevel = this.actor.getUncrewedSkillLevel(position);
+        context.uncrewedTooltips[position.id] = game.i18n.format("TWODSIX.Ship.UncrewedPositionTooltip", {skillLevel});
+      }
+    }
 
     const useShipAutoCalc = game.settings.get('twodsix', 'useShipAutoCalcs');
     const showCost = game.settings.get('twodsix', 'showCost') && useShipAutoCalc;

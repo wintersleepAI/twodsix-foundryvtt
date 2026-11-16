@@ -4,7 +4,14 @@ import { getTargetDMSelectObject } from './targetModifiers';
 
 /** @typedef {import("../entities/TwodsixActor").default} TwodsixActor */
 /** @typedef {import("../entities/TwodsixItem").default} TwodsixItem */
-import { addSign, getCharacteristicFromDisplayLabel, getKeyByValue, simplifySkillName } from './utils';
+import {
+  addSign,
+  getCharacteristicFromDisplayLabel,
+  getKeyByValue,
+  getSkillFromSelectionKey,
+  getSkillSelectionKey,
+  simplifySkillName
+} from './utils';
 
 export class TwodsixRollSettings {
   /** @type {string} */
@@ -175,7 +182,7 @@ export class TwodsixRollSettings {
       targetModifierOverride: settings?.rollModifiers?.targetModifierOverride ?? false,
       appliedEffects: {},
       chain: settings?.rollModifiers?.chain ?? 0,
-      selectedSkill: aSkill?.uuid || settings?.rollModifiers?.selectedSkill,
+      selectedSkill: getSkillSelectionKey(aSkill) || settings?.rollModifiers?.selectedSkill,
       skillLevelMax: settings?.rollModifiers?.skillLevelMax ?? undefined,
       armorModifier: settings?.rollModifiers?.armorModifier ?? 0,
       armorLabel: settings?.rollModifiers?.armorLabel ?? ""
@@ -340,7 +347,7 @@ export class TwodsixRollSettings {
       window: {title: title, icon: "fa-solid fa-dice"},
       content: html,
       buttons: buttons,
-      render: handleRender,
+      render: (event, dialog) => handleRender(event, dialog, skill?.actor),
       close: () => {
         Promise.resolve();
       },
@@ -352,16 +359,17 @@ export class TwodsixRollSettings {
 /**
  * @param {Event} ev
  * @param {foundry.applications.api.ApplicationV2} htmlRend
+ * @param {TwodsixActor | null | undefined} skillActor  the actor whose skills are listed in the dialog
  * @returns {void}
  */
-function handleRender(ev, htmlRend) {
+function handleRender(ev, htmlRend, skillActor) {
   htmlRend.element.querySelector(".select-skill")?.addEventListener("change", () => {
     const characteristicElement = htmlRend.element.querySelector('[name="rollModifiers.characteristic"]');
     let newSkill;
     if (characteristicElement) {
-      const newSkillUuid = htmlRend.element.querySelector('[name="rollModifiers.selectedSkill"]')?.value;
-      if (newSkillUuid) {
-        newSkill = fromUuidSync(newSkillUuid);
+      const newSkillKey = htmlRend.element.querySelector('[name="rollModifiers.selectedSkill"]')?.value;
+      if (newSkillKey) {
+        newSkill = getSkillFromSelectionKey(newSkillKey, skillActor);
         characteristicElement.value = newSkill?.system.characteristic || "NONE";
       }
     }

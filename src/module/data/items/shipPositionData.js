@@ -8,6 +8,8 @@ export class ShipPositionData extends TwodsixItemBaseData {
     schema.icon = new fields.StringField({...requiredBlankString});
     schema.actions = new fields.ObjectField({required: true, initial: {}});
     schema.order = new fields.NumberField({...requiredInteger, initial: 0});
+    // Added to the ship's defaultSkillLevel when this position has no actor and the ship allows that
+    schema.uncrewedSkillModifier = new fields.NumberField({...requiredInteger, initial: 0});
     return schema;
   }
 }

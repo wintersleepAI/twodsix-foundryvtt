@@ -198,7 +198,7 @@
                 <ol class="ol-no-indent">
                   <li class="battle-positions">
                     <a class="item-name position-name" data-action="positionClick">{{position.name}}</a>
-                    <select name="selectedActor">{{selectOptions position.actors selected = position.defaultActor}}</select>
+                    <select name="selectedActor" {{#if position.uncrewedTooltip}}data-tooltip="{{position.uncrewedTooltip}}"{{/if}}>{{selectOptions position.actors selected = position.defaultActor}}</select>
                     <select name="selectedAction">{{selectOptions position.actions selected = position.defaultAction}}</select>
                     <span class="item-controls centre">
                       <a class="item-control item-edit" data-tooltip='{{localize "TWODSIX.Actor.Items.EditItem"}}' data-action="itemEdit"><i class="fa-solid fa-wrench"></i></a>

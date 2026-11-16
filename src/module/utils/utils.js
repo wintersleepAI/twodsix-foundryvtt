@@ -1,4 +1,5 @@
 /** @typedef {import("../entities/TwodsixItem").default} TwodsixItem */
+/** @typedef {import("../entities/TwodsixActor").default} TwodsixActor */
 
 /**
  * Returns the localized, default short label based on logical shortLabel
@@ -29,6 +30,34 @@ export function getCharShortName(char) {
  */
 export function simplifySkillName(skillName) {
   return skillName.replace(/\W/g, "");
+}
+
+/**
+ * Key that identifies a skill in a skill selection list (see TwodsixActor#getSkillNameList).  This is the skill's uuid,
+ * or its item id when it belongs to an unsaved actor, such as a ship's virtual crew, whose items have no uuid.
+ * @param {TwodsixItem | null | undefined} skill
+ * @returns {string | undefined}
+ */
+export function getSkillSelectionKey(skill) {
+  return skill?.uuid || skill?.id || undefined;
+}
+
+/**
+ * Find the skill a skill selection key (see getSkillSelectionKey) refers to.
+ * @param {string | undefined} key   the selected key
+ * @param {TwodsixActor | null | undefined} actor  the actor whose skill list the key was chosen from
+ * @returns {TwodsixItem | null}  the skill, or null if the key can't be resolved
+ */
+export function getSkillFromSelectionKey(key, actor) {
+  if (!key) {
+    return null;
+  }
+  const ownSkill = actor?.items?.get(key);
+  if (ownSkill) {
+    return ownSkill;
+  }
+  // An unsaved actor's keys are item ids, so there is nothing for fromUuidSync to find
+  return (actor && !actor.uuid) ? null : (fromUuidSync(key) ?? null);
 }
 
 /**

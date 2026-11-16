@@ -161,29 +161,29 @@ export async function onChatCardAction(event, target) {
     if (!(isTargettedAction || game.user.isGM || actor.isOwner)) {
       return;
     }
-    // Get the Item from stored flag data
-    const storedData = message.getFlag("twodsix", "itemUUID");
-    const item = storedData ? await fromUuid(storedData) : {};
-    if (!item) {
-      const err = game.i18n.format("TWODSIX.Errors.ActionWarningNoItem", {item: storedData, name: actor.name});
-      return ui.notifications.error(err);
-    }
-
     const useInvertedShiftClick = (game.settings.get('twodsix', 'invertSkillRollShiftClick'));
     const showFormulaDialog = useInvertedShiftClick ? event["shiftKey"] : !event["shiftKey"];
     const bonusDamage = message.getFlag("twodsix", "bonusDamage") ?? "";
     const effect = message.getFlag("twodsix", "effect") ?? 0;
     switch (action) {
-      case "damage":
+      case "damage": {
+        // Only damage needs the rolled item; chain and opposed rolls work without it (e.g. after it is deleted)
+        const storedData = message.getFlag("twodsix", "itemUUID");
+        const item = storedData ? await fromUuid(storedData) : null;
+        if (!item) {
+          const err = game.i18n.format("TWODSIX.Errors.ActionWarningNoItem", {item: storedData, name: actor.name});
+          return ui.notifications.error(err);
+        }
         await item.rollDamage((game.settings.get('core', 'messageMode')), bonusDamage, true, showFormulaDialog, effect);
         break;
+      }
       case "opposed":
         //opposed roll
-        makeSecondaryRoll(message, "opposed", showFormulaDialog);
+        await makeSecondaryRoll(message, "opposed", showFormulaDialog);
         break;
       case "chain":
         //chain roll
-        makeSecondaryRoll(message, "chain", showFormulaDialog);
+        await makeSecondaryRoll(message, "chain", showFormulaDialog);
         break;
       default:
         break;
@@ -312,7 +312,10 @@ async function makeSecondaryRoll(message, type, showDialog) {
   let winnerName = "";
   if (roll && type === "opposed") {
     if (originalEffect > roll.effect) {
-      winnerName = (await fromUuid(message.getFlag("twodsix", "actorUUID"))).name;
+      // When the speaker isn't a saved actor (e.g. a ship's virtual crew, whose card carries the ship's uuid),
+      // use the speaker name shown on the card
+      const originalActor = message.speaker?.actor ? await fromUuid(message.getFlag("twodsix", "actorUUID")) : null;
+      winnerName = originalActor?.name || message.alias;
     } else if (roll.effect > originalEffect) {
       winnerName = secondActor.name;
     }

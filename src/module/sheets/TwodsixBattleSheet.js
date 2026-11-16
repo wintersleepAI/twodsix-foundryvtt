@@ -93,12 +93,17 @@ export class TwodsixBattleSheet extends foundry.applications.api.HandlebarsAppli
           defaultActor = actor.id;
         }
       }
+      if (this.actor.isUncrewedPosition(position)) {
+        // An empty actor id makes performShipAction use the position's virtual crew
+        actors[""] = game.i18n.format("TWODSIX.Ship.UncrewedPositionName", {positionName: position.name});
+      }
       positionData.push({
         id: position.id,
         name: position.name,
         actions: actions,
         actors: actors,
         defaultActor: defaultActor,
+        uncrewedTooltip: context.uncrewedTooltips[position.id] ?? "",
         defaultAction: defaultAction
       });
     }

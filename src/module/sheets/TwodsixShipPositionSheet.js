@@ -217,6 +217,7 @@ export class TwodsixShipPositionSheet extends foundry.applications.api.Handlebar
     });
     context.sortedActions.sort((a, b) => (a.order > b.order) ? 1 : -1);
     context.hasShipActor = !!this.actor;
+    context.allowNoActorPositions = !!this.actor?.system.shipAllowNoActorPositions;
     if (context.hasShipActor) {
       const shipPositionActorIds = Object.entries((this.actor?.system)?.shipPositionActorIds ?? {}).filter(([, shipPositionId]) => shipPositionId === this.item.id);
       if (shipPositionActorIds.length > 0) {
